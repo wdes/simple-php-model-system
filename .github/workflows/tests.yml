@@ -6,12 +6,29 @@ jobs:
     test-php:
         name: Test on php ${{ matrix.php-version }} and ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
+        services:
+          mysql:
+            image: mysql:5.7
+            env:
+              MYSQL_DATABASE: testdb
+              MYSQL_USER: testuser
+              MYSQL_PASSWORD: testpass
+              MYSQL_RANDOM_ROOT_PASSWORD: yes
+            ports:
+              - "3306:3306"
+            options: --name mysql-server --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
         strategy:
             matrix:
                 php-version: ["7.2", "7.3", "7.4", "8.0"]
-                os: [ubuntu-latest, macos-latest, windows-latest]
+                os: [ubuntu-latest]
         steps:
             - uses: actions/checkout@v2
+            - name: prepare mysql server
+              env:
+                TEST_MYSQL_HOST: "127.0.0.1"
+                TEST_MYSQL_USER: root
+                TEST_MYSQL_PASS: testbench
+                TEST_MYSQL_PORT: ${{ job.services.mysql.ports['3306'] }}
             - name: Use php ${{ matrix.php-version }}
               uses: shivammathur/setup-php@v2
               with:
@@ -25,8 +42,16 @@ jobs:
                   key: composer-cache
             - name: Install dependencies
               run: composer install --no-interaction
+            - name: Copy config
+              run: cp tests/config.dist.php tests/config.php
             - name: Run php tests
               run: composer run phpunit
+              env:
+                TEST_MYSQL_HOST: "mysql-server"
+                TEST_MYSQL_DB: testdb
+                TEST_MYSQL_USER: testuser
+                TEST_MYSQL_PASS: testpass
+                TEST_MYSQL_PORT: ${{ job.services.mysql.ports['3306'] }}
             - name: Send coverage
               uses: codecov/codecov-action@v1
               with:

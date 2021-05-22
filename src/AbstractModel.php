@@ -92,6 +92,27 @@ abstract class AbstractModel
         return $statement->rowCount() === 1;
     }
 
+    public static function count(): ?int
+    {
+        $instance = new static();
+
+        $count = Database::getInstance()->getConnection()->query(
+            'SELECT COUNT(*) FROM `' . $instance->getTable() . '`'
+        );
+
+        if ($count === false) {
+            return null;
+        }
+
+        $rows = $count->fetchColumn();
+
+        if ($rows === false) {
+            return null;
+        }
+
+        return (int) $rows;
+    }
+
     /**
      * @param static[] $instances
      */

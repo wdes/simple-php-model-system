@@ -27,7 +27,7 @@
             "email": "williamdes@wdes.fr"
         },
         {
-            "name": "Gwénola Etheve",
+            "name": "Gwénola ETHEVE",
             "email": "copyright@glavingo.com"
         }
     ],
@@ -38,7 +38,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "SimplePhpModelSystem\\Tests\\": "test/"
+            "SimplePhpModelSystem\\Tests\\": "test/",
+            "examples\\": "examples/"
         }
     },
     "require": {
