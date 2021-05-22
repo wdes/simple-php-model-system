@@ -380,6 +380,10 @@ class ExpositionTest extends DatabaseAbstractTestCase
             'last_name' => 'Etheve',
             ]
         );
+
+        $this->assertNotNull($user1);
+        /** @var User $user1 */
+
         $this->assertTrue($user1->delete());
         $this->assertFalse($user1->refresh());
         $this->assertSame(0, User::count());
