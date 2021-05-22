@@ -58,6 +58,16 @@ class ExpositionTest extends DatabaseAbstractTestCase
             $user->getKeys()
         );
 
+        $this->assertSame(
+            [
+                'user_uuid' => '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+                'first_name' => 'Gwénola',
+                'last_name' => 'Etheve',
+                'date_of_birth' => null,
+            ],
+            $user->toArray()
+        );
+
         $this->assertSame('5c8169b1-d6ef-4415-8c39-e1664df8b954', $user->getValue('user_uuid'));
     }
 
