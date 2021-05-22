@@ -297,6 +297,46 @@ class ExpositionTest extends DatabaseAbstractTestCase
         $this->assertSame(0, User::count());
     }
 
+    public function testDeleteWhereMultiple(): void
+    {
+        $this->cleanupUsers();
+        $this->assertSame(0, User::count());
+        $user1 = User::create(
+            '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+            'Gwénola',
+            'Etheve',
+            null
+        );
+        $this->assertTrue($user1->save());
+        $user2 = User::create(
+            '874d1aa5-4db3-4953-88dd-2dd58a298d3e',
+            'William',
+            'Desportes',
+            null
+        );
+
+        $this->assertTrue($user2->save());
+        $this->assertSame(2, User::count());
+        $this->assertNotNull(User::findById('5c8169b1-d6ef-4415-8c39-e1664df8b954'));
+        $this->assertNotNull(User::findById('874d1aa5-4db3-4953-88dd-2dd58a298d3e'));
+        $this->emptyQueries();
+        User::deleteWhere(
+            [
+                'first_name' => ['William', 'Gwénola'],
+            ]
+        );
+        $this->assertWasQuery(
+            'DELETE FROM `users` WHERE `first_name` IN(?,?);',
+            [
+                'William',
+                'Gwénola',
+            ]
+        );
+        $this->assertNull(User::findById('874d1aa5-4db3-4953-88dd-2dd58a298d3e'));
+        $this->assertNull(User::findById('5c8169b1-d6ef-4415-8c39-e1664df8b954'));
+        $this->assertSame(0, User::count());
+    }
+
     public function testRefreshDeleted(): void
     {
         $this->cleanupUsers();
@@ -309,6 +349,37 @@ class ExpositionTest extends DatabaseAbstractTestCase
         );
         $this->assertTrue($user1->save());
         $this->assertTrue($user1->refresh());
+        $this->assertTrue($user1->delete());
+        $this->assertFalse($user1->refresh());
+        $this->assertSame(0, User::count());
+    }
+
+    public function testFindWhere(): void
+    {
+        $this->cleanupUsers();
+        $this->assertSame(0, User::count());
+        $user1 = User::create(
+            '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+            'Gwénola',
+            'Etheve',
+            null
+        );
+        $this->assertTrue($user1->save());
+        unset($user1);
+        $this->assertNull(
+            User::findWhere(
+                [
+                'first_name' => 'Gwénola',
+                'last_name' => 'Dupond',
+                ]
+            )
+        );
+        $user1 = User::findWhere(
+            [
+            'first_name' => 'Gwénola',
+            'last_name' => 'Etheve',
+            ]
+        );
         $this->assertTrue($user1->delete());
         $this->assertFalse($user1->refresh());
         $this->assertSame(0, User::count());
