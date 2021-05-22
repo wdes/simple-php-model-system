@@ -62,7 +62,7 @@ $user1->toArray();
 //    'date_of_birth' => null,
 //]
 $user1->refresh(); // Get it back from the DB
-$user1->set('last_name', 'Ali-2');// Change an attribute value
+$user1->setLastName('last_name', 'Ali-2');// Change an attribute value (build your own setters using the example)
 $user1->update();// Update it
 $user1->delete();// Delete it
 User::deleteAll();// Delete all

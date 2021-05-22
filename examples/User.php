@@ -48,4 +48,9 @@ class User extends AbstractModel
         );
     }
 
+    public function setLastName(string $lastName): void
+    {
+        $this->set('last_name', $lastName);
+    }
+
 }
