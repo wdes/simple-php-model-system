@@ -54,7 +54,7 @@ class Database
             $this->dbConfig['name'],
             $this->dbConfig['host'],
             $this->dbConfig['port'],
-            $this->dbConfig['charset'],
+            $this->dbConfig['charset']
         );
         try {
             $this->connection = new PDO(

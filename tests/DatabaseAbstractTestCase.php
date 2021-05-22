@@ -81,16 +81,16 @@ abstract class DatabaseAbstractTestCase extends AbstractTestCase
             $this->emptyQueries();
             return;
         }
-        $this->dbConnection->query(
-            <<<SQL
+        $createUsers = <<<SQL
             CREATE TABLE `users` (
                 user_uuid VARCHAR(128),
                 first_name VARCHAR(50),
                 last_name VARCHAR(50),
                 date_of_birth DATE
             ) CHARACTER SET 'utf8';
-        SQL
-        );
+SQL;
+// Do not indent or add a comment on the line, PHP 7.2 compat
+        $this->dbConnection->query($createUsers);
         $this->emptyQueries();
     }
 
