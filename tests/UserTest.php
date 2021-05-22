@@ -204,4 +204,174 @@ class ExpositionTest extends DatabaseAbstractTestCase
         );
     }
 
+    public function testGetKey(): void
+    {
+        $this->cleanupUsers();
+        $this->assertSame(0, User::count());
+        $user1 = User::create(
+            '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+            'Gwénola',
+            'Etheve',
+            null
+        );
+        $this->assertTrue($user1->save());
+        $user2 = User::create(
+            '874d1aa5-4db3-4953-88dd-2dd58a298d3e',
+            'William',
+            'Desportes',
+            null
+        );
+
+        $this->assertTrue($user2->save());
+        $this->assertSame(2, User::count());
+        $this->assertSame('5c8169b1-d6ef-4415-8c39-e1664df8b954', $user1->getKey());
+        $this->assertSame('874d1aa5-4db3-4953-88dd-2dd58a298d3e', $user2->getKey());
+        User::deleteAll();
+    }
+
+    public function testDeleteWherePrimary(): void
+    {
+        $this->cleanupUsers();
+        $this->assertSame(0, User::count());
+        $user1 = User::create(
+            '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+            'Gwénola',
+            'Etheve',
+            null
+        );
+        $this->assertTrue($user1->save());
+        $user2 = User::create(
+            '874d1aa5-4db3-4953-88dd-2dd58a298d3e',
+            'William',
+            'Desportes',
+            null
+        );
+
+        $this->assertTrue($user2->save());
+        $this->assertSame(2, User::count());
+        $this->assertNotNull(User::findById('5c8169b1-d6ef-4415-8c39-e1664df8b954'));
+        User::deleteWherePrimary('5c8169b1-d6ef-4415-8c39-e1664df8b954');
+        $this->assertNull(User::findById('5c8169b1-d6ef-4415-8c39-e1664df8b954'));
+        $this->assertSame(1, User::count());
+        User::deleteAll();
+        $this->assertSame(0, User::count());
+    }
+
+    public function testDeleteWhere(): void
+    {
+        $this->cleanupUsers();
+        $this->assertSame(0, User::count());
+        $user1 = User::create(
+            '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+            'Gwénola',
+            'Etheve',
+            null
+        );
+        $this->assertTrue($user1->save());
+        $user2 = User::create(
+            '874d1aa5-4db3-4953-88dd-2dd58a298d3e',
+            'William',
+            'Desportes',
+            null
+        );
+
+        $this->assertTrue($user2->save());
+        $this->assertSame(2, User::count());
+        $this->assertNotNull(User::findById('5c8169b1-d6ef-4415-8c39-e1664df8b954'));
+        $this->assertNotNull(User::findById('874d1aa5-4db3-4953-88dd-2dd58a298d3e'));
+        User::deleteWhere(
+            [
+                'first_name' => 'William',
+            ]
+        );
+        $this->assertWasQuery(
+            'DELETE FROM `users` WHERE `first_name` = ?;',
+            [
+                'William',
+            ]
+        );
+        $this->assertNull(User::findById('874d1aa5-4db3-4953-88dd-2dd58a298d3e'));
+        $this->assertNotNull(User::findById('5c8169b1-d6ef-4415-8c39-e1664df8b954'));
+        $this->assertSame(1, User::count());
+        User::deleteAll();
+        $this->assertSame(0, User::count());
+    }
+
+    public function testRefreshDeleted(): void
+    {
+        $this->cleanupUsers();
+        $this->assertSame(0, User::count());
+        $user1 = User::create(
+            '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+            'Gwénola',
+            'Etheve',
+            null
+        );
+        $this->assertTrue($user1->save());
+        $this->assertTrue($user1->refresh());
+        $this->assertTrue($user1->delete());
+        $this->assertFalse($user1->refresh());
+        $this->assertSame(0, User::count());
+    }
+
+    public function testUpdateNoChanges(): void
+    {
+        $this->cleanupUsers();
+        $this->assertSame(0, User::count());
+        $user1 = User::create(
+            '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+            'Gwénola',
+            'Etheve',
+            null
+        );
+        $this->assertTrue($user1->save());
+        $this->assertFalse($user1->update());
+        $this->assertTrue($user1->delete());
+    }
+
+    public function testInsertBatch(): void
+    {
+        $this->cleanupUsers();
+        $this->assertSame(0, User::count());
+        $user1 = User::create(
+            '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+            'Gwénola',
+            'Etheve',
+            null
+        );
+        $user2 = User::create(
+            '874d1aa5-4db3-4953-88dd-2dd58a298d3e',
+            'William',
+            'Desportes',
+            null
+        );
+        $this->assertFalse($user1->refresh(), 'Does not exist in DB');
+        $this->assertFalse($user2->refresh(), 'Does not exist in DB');
+        $this->assertTrue(User::saveBatch([]));
+        $this->emptyQueries();
+        $this->assertTrue(
+            User::saveBatch(
+                [
+                    $user1,
+                    $user2
+                ]
+            )
+        );
+        $this->assertWasQuery(
+            'INSERT INTO `users` (user_uuid, first_name, last_name, date_of_birth) VALUES (?, ?, ?, ?), (?, ?, ?, ?)',
+            [
+                0 => '5c8169b1-d6ef-4415-8c39-e1664df8b954',
+                1 => 'Gwénola',
+                2 => 'Etheve',
+                3 => null,
+                4 => '874d1aa5-4db3-4953-88dd-2dd58a298d3e',
+                5 => 'William',
+                6 => 'Desportes',
+                7 => null,
+            ]
+        );
+        $this->assertTrue($user1->refresh(), 'Should exist in DB');
+        $this->assertTrue($user2->refresh(), 'Should exist in DB');
+    }
+
 }
