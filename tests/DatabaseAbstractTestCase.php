@@ -82,7 +82,7 @@ abstract class DatabaseAbstractTestCase extends AbstractTestCase
             return;
         }
         $this->dbConnection->query(
-            <<<'SQL'
+            <<<SQL
             CREATE TABLE `users` (
                 user_uuid VARCHAR(128),
                 first_name VARCHAR(50),
