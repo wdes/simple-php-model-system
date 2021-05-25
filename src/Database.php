@@ -16,6 +16,7 @@ use PDOStatement;
  * You can obtain one at https://mozilla.org/MPL/2.0/.
  * @license MPL-2.0 https://mozilla.org/MPL/2.0/
  * @source https://github.com/wdes/simple-php-model-system
+ * @version 1.1.0
  */
 
 /**
@@ -30,20 +31,54 @@ class Database
     private $dbConfig;
 
     /**
-     * @var PDO
+     * @var PDO|null
      */
     private $connection;
 
-    /** @var self|null $instance */
-    protected static $instance = null;
+    /** @var self[] $instances */
+    protected static $instances = [];
 
-    public function __construct(array $config)
+    public const MAIN_CONNECTION   = 0x1;
+    public const SECOND_CONNECTION = 0x2;
+    public const THIRD_CONNECTION  = 0x2;
+
+    /**
+     * Build a Database object
+     *
+     * @param array $config
+     * @param int $connection Database::MAIN_CONNECTION, Database::SECOND_CONNECTION, Database::THIRD_CONNECTION
+     */
+    public function __construct(array $config, int $connection = self::MAIN_CONNECTION)
     {
-        $this->dbConfig = $config['database'][$config['currentDatabaseEnv']];
-        self::$instance = $this;
+        if (! isset($config['database']) || ! isset($config['currentDatabaseEnv'])) {
+            throw new Exception('Invalid config to create the Database');
+        }
+
+        $this->dbConfig               = $config['database'][$config['currentDatabaseEnv']];
+        self::$instances[$connection] = $this;
     }
 
     /**
+     * @since 1.1.0
+     */
+    public function disconnect(): void
+    {
+        if ($this->connection !== null) {
+            $this->connection = null;
+        }
+    }
+
+    /**
+     * @since 1.1.0
+     */
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+
+    /**
+     * Connect to the database
+     *
      * @throws PDOException when the connetion fails
      */
     public function connect(): void
@@ -79,13 +114,23 @@ class Database
         return $this->connection;
     }
 
-    public static function getInstance(): self
+    /**
+     * Access the database instance
+     *
+     * @param int $connection Database::MAIN_CONNECTION, Database::SECOND_CONNECTION, Database::THIRD_CONNECTION
+     */
+    public static function getInstance(int $connection = self::MAIN_CONNECTION): self
     {
-        if (self::$instance === null) {
-            throw new Exception('The Database object was never created, use new Database() at least once');
+        if ((self::$instances[$connection] ?? null) === null) {
+            throw new Exception(
+                sprintf(
+                    'The Database object was never created (connection: %d), use new Database() at least once',
+                    $connection
+                )
+            );
         }
 
-        return self::$instance;
+        return self::$instances[$connection];
     }
 
     /**
