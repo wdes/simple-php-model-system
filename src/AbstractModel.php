@@ -15,7 +15,7 @@ use PDO;
  * You can obtain one at https://mozilla.org/MPL/2.0/.
  * @license MPL-2.0 https://mozilla.org/MPL/2.0/
  * @source https://github.com/wdes/simple-php-model-system
- * @version 1.1.0
+ * @version 1.2.0
  */
 
 abstract class AbstractModel
@@ -77,6 +77,14 @@ abstract class AbstractModel
     public function hasChanges(): bool
     {
         return count($this->keysToModify) > 0;
+    }
+
+    /**
+     * @since 1.2.0
+     */
+    public function getChangedKeys(): array
+    {
+        return array_keys($this->keysToModify);
     }
 
     public function save(): bool
@@ -271,7 +279,7 @@ abstract class AbstractModel
 
     public function update(): bool
     {
-        if (count($this->keysToModify) === 0) {
+        if (! $this->hasChanges()) {
             return false;
         }
 
