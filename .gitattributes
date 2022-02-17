@@ -6,4 +6,5 @@
 /phpcs.xml export-ignore
 /phpunit.xml export-ignore
 /phpstan.neon export-ignore
+/phpstan-baseline.neon export-ignore
 /.editorconfig export-ignore
