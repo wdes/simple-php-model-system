@@ -25,7 +25,6 @@ use PDOStatement;
  */
 class Database
 {
-
     /**
      * @var array<string,string|int>
      *
@@ -111,7 +110,9 @@ class Database
     public function connect(): void
     {
         if ($this->dbConfig === null) {
-            throw new LogicException('You need to pass the config when creating the Database instance to use the connect method.');
+            throw new LogicException(
+                'You need to pass the config when creating the Database instance to use the connect method.'
+            );
         }
 
         $dsn = sprintf(

@@ -8,5 +8,7 @@
     <file>.</file>
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/build/*</exclude-pattern>
-    <rule ref="Wdes"></rule>
+    <rule ref="Wdes">
+        <exclude name="PSR12.Classes.OpeningBraceSpace.Found"/>
+    </rule>
 </ruleset>
