@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace SimplePhpModelSystem;
 
 use Exception;
+use LogicException;
 use PDO;
 use PDOException;
 use PDOStatement;
@@ -26,14 +27,24 @@ class Database
 {
 
     /**
-     * @var array
+     * @var array<string,string|int>
+     *
+     * @phpstan-var array{
+     *  adapter: string,
+     *  name: string,
+     *  host: string,
+     *  user: string,
+     *  pass: string,
+     *  port: int,
+     *  charset: int
+     * }
      */
-    private $dbConfig;
+    private $dbConfig = null;
 
     /**
      * @var PDO|null
      */
-    private $connection;
+    private $connection = null;
 
     /** @var self[] $instances */
     protected static $instances = [];
@@ -45,16 +56,32 @@ class Database
     /**
      * Build a Database object
      *
-     * @param array $config
+     * @param array|null $config The config block or null if you will use the setConnection method
      * @param int $connection Database::MAIN_CONNECTION, Database::SECOND_CONNECTION, Database::THIRD_CONNECTION
+     * @phpstan-param array{
+     *  currentDatabaseEnv: string,
+     *  database: array<string, array{
+     *      adapter: string,
+     *      name: string,
+     *      host: string,
+     *      user: string,
+     *      pass: string,
+     *      port: int,
+     *      charset: int
+     *  }>
+     * }|null $config
+     * @phpstan-param Database::*_CONNECTION $connection
      */
-    public function __construct(array $config, int $connection = self::MAIN_CONNECTION)
+    public function __construct(?array $config, int $connection = self::MAIN_CONNECTION)
     {
-        if (! isset($config['database']) || ! isset($config['currentDatabaseEnv'])) {
+        /** @var array{currentDatabaseEnv?: string, database?: array<string, array{adapter: string, name: string, host: string, user: string, pass: string, port: int, charset: int}>}|null $config */
+        if ((! isset($config['database']) || ! isset($config['currentDatabaseEnv'])) && $config !== null) {
             throw new Exception('Invalid config to create the Database');
         }
 
-        $this->dbConfig               = $config['database'][$config['currentDatabaseEnv']];
+        if ($config !== null) {
+            $this->dbConfig = $config['database'][$config['currentDatabaseEnv']];
+        }
         self::$instances[$connection] = $this;
     }
 
@@ -83,6 +110,10 @@ class Database
      */
     public function connect(): void
     {
+        if ($this->dbConfig === null) {
+            throw new LogicException('You need to pass the config when creating the Database instance to use the connect method.');
+        }
+
         $dsn = sprintf(
             '%s:dbname=%s;host=%s;port=%d;charset=%s',
             $this->dbConfig['adapter'],
@@ -103,6 +134,14 @@ class Database
         } catch (PDOException $pe) {
             throw $pe;
         }
+    }
+
+    /**
+     * @since 1.2.0
+     */
+    public function setConnection(PDO $connection): void
+    {
+        $this->connection = $connection;
     }
 
     public function getConnection(): PDO
