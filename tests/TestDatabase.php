@@ -26,7 +26,7 @@ class TestDatabase extends Database
     {
         self::$queries[] = [
             $query,
-            $params
+            $params,
         ];
     }
 

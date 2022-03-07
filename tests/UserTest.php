@@ -115,7 +115,7 @@ class ExpositionTest extends DatabaseAbstractTestCase
         $users = User::fetchAll();
         $this->assertEquals(
             [// Not same because it is not the same object but only the same contents
-                $user1
+                $user1,
             ],
             $users
         );
@@ -137,7 +137,7 @@ class ExpositionTest extends DatabaseAbstractTestCase
         $users = User::fetchAll();
         $this->assertEquals(
             [// Not same because it is not the same object but only the same contents
-            $user1
+            $user1,
             ],
             $users
         );
@@ -171,14 +171,14 @@ class ExpositionTest extends DatabaseAbstractTestCase
         $this->assertEquals(
             [// Not same because it is not the same object but only the same contents
                 0 => $user1,
-                1 => $user2
+                1 => $user2,
             ],
             $users
         );
         $this->assertNotEquals(
             [// Not same because it is not the same object but only the same contents
                 0 => $user2,
-                1 => $user1
+                1 => $user1,
             ],
             $users
         );
@@ -191,14 +191,14 @@ class ExpositionTest extends DatabaseAbstractTestCase
         $this->assertEquals(
             [// Not same because it is not the same object but only the same contents
                 0 => $user2,
-                1 => $user1
+                1 => $user1,
             ],
             $users
         );
         $this->assertNotEquals(
             [// Not same because it is not the same object but only the same contents
                 0 => $user1,
-                1 => $user2
+                1 => $user2,
             ],
             $users
         );
@@ -428,7 +428,7 @@ class ExpositionTest extends DatabaseAbstractTestCase
             User::saveBatch(
                 [
                     $user1,
-                    $user2
+                    $user2,
                 ]
             )
         );
