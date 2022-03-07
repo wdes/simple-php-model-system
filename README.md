@@ -1,10 +1,12 @@
 # simple-php-model-system
 
-![Lint and analyse files](https://github.com/wdes/simple-php-model-system/workflows/Lint%20and%20analyse%20files/badge.svg?branch=main)
-![Run phpunit tests](https://github.com/wdes/simple-php-model-system/workflows/Run%20phpunit%20tests/badge.svg?branch=main)
+[![Lint and analyse files](https://github.com/wdes/simple-php-model-system/actions/workflows/lint-and-analyse.yml/badge.svg?branch=main)](https://github.com/wdes/simple-php-model-system/actions/workflows/lint-and-analyse.yml)
+[![Run phpunit tests](https://github.com/wdes/simple-php-model-system/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/wdes/simple-php-model-system/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/wdes/simple-php-model-system/branch/main/graph/badge.svg)](https://codecov.io/gh/wdes/simple-php-model-system)
-![Packagist](https://img.shields.io/packagist/l/wdes/simple-php-model-system.svg)
-[![Latest Stable Version](https://poser.pugx.org/wdes/simple-php-model-system/v/stable)](https://packagist.org/packages/wdes/simple-php-model-system)
+[![Version](http://poser.pugx.org/wdes/simple-php-model-system/version)](https://packagist.org/packages/wdes/simple-php-model-system)
+[![License](http://poser.pugx.org/wdes/simple-php-model-system/license)](https://packagist.org/packages/wdes/simple-php-model-system)
+[![PHP Version Require](http://poser.pugx.org/wdes/simple-php-model-system/require/php)](https://packagist.org/packages/wdes/simple-php-model-system)
+[![.gitattributes](http://poser.pugx.org/wdes/simple-php-model-system/gitattributes)](https://packagist.org/packages/wdes/simple-php-model-system)
 
 A simple PHP model system
 
