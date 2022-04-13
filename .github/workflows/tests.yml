@@ -22,7 +22,7 @@ jobs:
                 php-version: ["7.2", "7.3", "7.4", "8.0", "8.1"]
                 os: [ubuntu-latest]
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Use php ${{ matrix.php-version }}
               uses: shivammathur/setup-php@v2
               with:
@@ -30,7 +30,7 @@ jobs:
                   coverage: xdebug
                   extensions: mbstring
             - name: Cache module
-              uses: actions/cache@v2
+              uses: actions/cache@v3
               with:
                   path: ~/.composer/cache/
                   key: composer-cache
