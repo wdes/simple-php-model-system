@@ -11,10 +11,10 @@
         "source": "https://github.com/wdes/simple-php-model-system"
     },
     "scripts": {
-        "phpcs": "./vendor/bin/phpcs",
-        "phpcbf": "./vendor/bin/phpcbf",
-        "phpstan": "./vendor/bin/phpstan",
-        "phpunit": "./vendor/bin/phpunit"
+        "phpcs": "@php phpcs",
+        "phpcbf": "@php phpcbf",
+        "phpstan": "@php phpstan",
+        "phpunit": "@php phpunit"
     },
     "keywords": [
         "model",
