@@ -529,7 +529,7 @@ abstract class AbstractModel
      */
     protected function set($key, $value): void
     {
-        if ($this->data[$key] === $value) {
+        if (array_key_exists($key, $this->data) && $this->data[$key] === $value) {
             return;// No changes to apply
         }
 
