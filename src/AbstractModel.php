@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace SimplePhpModelSystem;
 
 use Exception;
+use Generator;
 use LogicException;
 use PDO;
 
@@ -15,15 +16,15 @@ use PDO;
  * You can obtain one at https://mozilla.org/MPL/2.0/.
  * @license MPL-2.0 https://mozilla.org/MPL/2.0/
  * @source https://github.com/wdes/simple-php-model-system
- * @version 1.2.0
+ * @version 1.3.0
  */
 
 abstract class AbstractModel
 {
     /**
-     * @var array<string,mixed>
+     * @var array<string|int,mixed>
      */
-    protected $data;
+    protected $data = [];
 
     /**
      * @var string
@@ -36,7 +37,7 @@ abstract class AbstractModel
     protected $primaryKey = 'id';
 
     /**
-     * @var array<string,true>
+     * @var array<string|int,true>
      */
     private $keysToModify = [];
 
@@ -47,6 +48,8 @@ abstract class AbstractModel
 
     /**
      * The keys of the data
+     *
+     * @return (string|int)[]
      */
     public function getKeys(): array
     {
@@ -55,6 +58,8 @@ abstract class AbstractModel
 
     /**
      * The values of the data
+     *
+     * @return mixed[]
      */
     public function getValues(): array
     {
@@ -81,6 +86,8 @@ abstract class AbstractModel
 
     /**
      * @since 1.2.0
+     *
+     * @return (string|int)[]
      */
     public function getChangedKeys(): array
     {
@@ -195,41 +202,63 @@ abstract class AbstractModel
     }
 
     /**
-     * @param string|int $primaryKeyValues
+     * @param string|int $primaryKeyValue
      * @return static|null
      */
-    public static function findById(...$primaryKeyValues): ?self
+    public static function findById($primaryKeyValue): ?self
     {
         $instance = new static();
-        $pkClause = $instance->getPrimaryKeyClause();
-        $query    = 'SELECT * FROM `' . $instance->getTable() . '` WHERE ' . $pkClause[0] . ';';
+        if (is_array($instance->primaryKey)) {
+            throw new LogicException(
+                'This model has multiple columns as a key, you can not use findById. Use findWhere instead.'
+            );
+        }
 
-        return self::buildOneFromQuery($query, $primaryKeyValues);
+        return self::findWhere(
+            [
+                $instance->primaryKey => $primaryKeyValue,
+            ]
+        );
     }
 
     /**
+     * @param array<int|string,mixed> $valuesToBind
      * @return static[]
      */
     public static function buildMultipleFromQuery(string $query, array $valuesToBind): array
     {
-        $statement = Database::getInstance()->query($query, $valuesToBind);
-        if ($statement === null) {
-            return [];
-        }
         $data = [];
-
-        while (($row = $statement->fetch(PDO::FETCH_ASSOC)) !== false) {
-            $newRow = new static();
-            $row    = $newRow->transform($row);
-            $newRow->setData($row);
-            $data[] = $newRow;
+        $rows = self::generateMultipleFromQuery($query, $valuesToBind);
+        foreach ($rows as $row) {
+            $data[] = $row;
         }
-
         return $data;
     }
 
     /**
+     * @param array<int|string,mixed> $valuesToBind
+     * @return \Generator<int,static>
+     */
+    public static function generateMultipleFromQuery(string $query, array $valuesToBind): Generator
+    {
+        $statement = Database::getInstance()->query($query, $valuesToBind);
+        if ($statement === null) {
+            return;
+        }
+
+        while (($row = $statement->fetch(PDO::FETCH_ASSOC)) !== false) {
+            $newRow = new static();
+            /** @var array<string|int,mixed> $row */
+            $row = $row;// phpstan workaround for type doc
+            $row = $newRow->transform($row);
+            $newRow->setData($row);
+            yield $newRow;
+        }
+    }
+
+    /**
      * @return static|null Null if not found
+     * @param array<int|string,mixed> $valuesToBind PDO input params
      */
     public static function buildOneFromQuery(string $query, array $valuesToBind): ?self
     {
@@ -238,6 +267,7 @@ abstract class AbstractModel
             return null;
         }
 
+        /** @var array<string|int,mixed>|false $row */
         $row = $statement->fetch(PDO::FETCH_ASSOC);
         if ($row === false) {
             return null;
@@ -252,27 +282,107 @@ abstract class AbstractModel
 
     /**
      * @param array<string,mixed> $whereClause
-     * @return static|null
+     * @param bool $asGenerator Return a generator
+     * @return static[]|\Generator<int,static>
+     * @phpstan-return ($asGenerator is true ? \Generator<int,static> : static[])
+     *
+     * @since 1.3.0
      */
-    public static function findWhere(array $whereClause): ?self
+    public static function collectCursorOrArrayWhere(array $whereClause, bool $asGenerator)
     {
         $instance = new static();
 
+        [$whereClauseString, $valuesToBind] = self::buildWhereClause($whereClause);
+
+        $query = 'SELECT * FROM `' . $instance->getTable() . '` WHERE ' . $whereClauseString . ';';
+
+        if ($asGenerator) {
+            return self::generateMultipleFromQuery($query, $valuesToBind);
+        }
+
+        return self::buildMultipleFromQuery($query, $valuesToBind);
+    }
+
+    /**
+     * @param array<string,mixed> $whereClause
+     * @return static[]
+     *
+     * @since 1.3.0
+     */
+    public static function collectWhere(array $whereClause): array
+    {
+        return self::collectCursorOrArrayWhere($whereClause, false);
+    }
+
+    /**
+     * @param array<string,mixed> $whereClause
+     * @return \Generator<int,static>
+     *
+     * @since 1.3.0
+     */
+    public static function collectCursorWhere(array $whereClause): Generator
+    {
+        return self::collectCursorOrArrayWhere($whereClause, true);
+    }
+
+    /**
+     * @param array<string,mixed> $whereClause
+     * @return array<int,string|mixed[]>
+     *
+     * @phpstan-return array{0: string, 1: mixed[]}
+     *
+     * @since 1.3.0
+     */
+    public static function buildWhereClause(array $whereClause): array
+    {
         $whereClauseString = '';
         $valuesToBind      = [];
 
         $whereKeys = array_keys($whereClause);
         $last      = end($whereKeys);
         foreach ($whereClause as $key => $valueToBind) {
-            $notLast            = $key !== $last;
-            $whereClauseString .= '`' . $key . '` = ?';
+            $notLast  = $key !== $last;
+            $operator = '= ?';
+            $hasBind  = true;
+
+            if ($valueToBind === null) {
+                $operator = 'IS NULL';
+                $hasBind  = false;
+            }
+
+            $multipleValuesMode = $valueToBind !== null && is_array($valueToBind);
+
+            if ($multipleValuesMode) {
+                $operator = 'IN(' . join(',', array_fill(0, count($valueToBind), '?')) . ')';
+            }
+
+            $whereClauseString .= '`' . $key . '` ' . $operator;
             if ($notLast) {
                 $whereClauseString .= ' AND ';
             }
-            $valuesToBind[] = $valueToBind;
+            if ($multipleValuesMode) {
+                array_push($valuesToBind, ...$valueToBind);
+                continue;
+            }
+            if ($hasBind) {
+                $valuesToBind[] = $valueToBind;
+            }
         }
 
-        $query = 'SELECT * FROM `' . $instance->getTable() . '` WHERE ' . $whereClauseString . ';';
+        return [$whereClauseString, $valuesToBind];
+    }
+
+    /**
+     * @param array<string,mixed> $whereClause
+     * @return static|null
+     */
+    public static function findWhere(array $whereClause): ?self
+    {
+        $instance = new static();
+
+        [$whereClauseString, $valuesToBind] = self::buildWhereClause($whereClause);
+
+        $query = 'SELECT * FROM `' . $instance->getTable() . '` WHERE ' . $whereClauseString . ' LIMIT 1;';
 
         return self::buildOneFromQuery($query, $valuesToBind);
     }
@@ -337,29 +447,7 @@ abstract class AbstractModel
     {
         $instance = new static();
 
-        $whereClauseString = '';
-        $valuesToBind      = [];
-
-        $whereKeys = array_keys($whereClause);
-        $last      = end($whereKeys);
-        foreach ($whereClause as $key => $valueToBind) {
-            $notLast  = $key !== $last;
-            $operator = '= ?';
-
-            if (is_array($valueToBind)) {
-                $operator = 'IN(' . join(',', array_fill(0, count($valueToBind), '?')) . ')';
-            }
-
-            $whereClauseString .= '`' . $key . '` ' . $operator;
-            if ($notLast) {
-                $whereClauseString .= ' AND ';
-            }
-            if (is_array($valueToBind)) {
-                array_push($valuesToBind, ...$valueToBind);
-                continue;
-            }
-            $valuesToBind[] = $valueToBind;
-        }
+        [$whereClauseString, $valuesToBind] = self::buildWhereClause($whereClause);
 
         $query     = 'DELETE FROM `' . $instance->getTable() . '` WHERE ' . $whereClauseString . ';';
         $statement = Database::getInstance()->query($query, $valuesToBind);
@@ -398,7 +486,7 @@ abstract class AbstractModel
     }
 
     /**
-     * @return string|int
+     * @return mixed
      */
     public function getKey()
     {
@@ -410,10 +498,9 @@ abstract class AbstractModel
     }
 
     /**
-     * setData
+     * Set the data
      *
-     * @param  array<string,mixed> $data
-     * @return void
+     * @param  array<string|int,mixed> $data
      */
     public function setData(array $data): void
     {
@@ -421,10 +508,23 @@ abstract class AbstractModel
     }
 
     /**
-     * setData
+     * Merge data and affect changed states
      *
-     * @param  mixed $key
-     * @param  string|int $value
+     * @param  array<string|int,mixed> $data
+     * @return void
+     */
+    public function mergeData(array $data): void
+    {
+        foreach ($data as $key => $value) {
+            $this->set($key, $value);
+        }
+    }
+
+    /**
+     * Set the data in the model
+     *
+     * @param  string|int $key
+     * @param  mixed $value
      * @return void
      */
     protected function set($key, $value): void
@@ -438,8 +538,8 @@ abstract class AbstractModel
     }
 
     /**
-     * @param array<string,string|int> $data
-     * @return array<string,string|int>
+     * @param array<string|int,mixed> $data
+     * @return array<string|int,mixed>
      */
     protected function transform(array $data): array
     {
@@ -447,7 +547,7 @@ abstract class AbstractModel
     }
 
     /**
-     * @return array<string,string|int>
+     * @return array<string|int,mixed>
      */
     public function toArray(): array
     {
@@ -458,12 +558,13 @@ abstract class AbstractModel
     {
         $pkClause = $this->getPrimaryKeyClause();
 
-        $query     = 'SELECT * FROM `' . $this->getTable() . '` WHERE ' . $pkClause[0] . ';';
+        $query     = 'SELECT * FROM `' . $this->getTable() . '` WHERE ' . $pkClause[0] . ' LIMIT 1;';
         $statement = Database::getInstance()->query($query, $pkClause[1]);
         if ($statement === null) {
             return false;
         }
 
+        /** @var array<string|int,mixed>|false $row */
         $row = $statement->fetch(PDO::FETCH_ASSOC);
         if ($row === false) {
             return false;
@@ -475,20 +576,24 @@ abstract class AbstractModel
         return true;
     }
 
+    /**
+     * @return array<int,string|mixed[]>
+     * @phpstan-return array{0: string, 1: mixed[]}
+     */
     public function getPrimaryKeyClause(): array
     {
-        $pks = $this->primaryKey;
-        if (is_string($pks)) {
-            $pks = [$pks];
+        $keyNames = $this->primaryKey;
+        if (! is_array($keyNames)) {
+            $keyNames = [$keyNames];
         }
-        $values   = [];
-        $pkString = '';
-        foreach ($pks as $pk) {
-            $pkString .= '`' . $pk . '` = ?';
-            $values[]  = $this->data[$pk] ?? null;
+        $dataWhere = [];
+        foreach ($keyNames as $keyName) {
+            if (array_key_exists($keyName, $this->data)) {
+                $dataWhere[$keyName] = $this->data[$keyName];
+            }
         }
 
-        return [$pkString, $values];
+        return self::buildWhereClause($dataWhere);
     }
 
 }

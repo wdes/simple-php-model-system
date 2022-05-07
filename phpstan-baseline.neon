@@ -1,27 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Method SimplePhpModelSystem\\\\AbstractModel\\:\\:getKey\\(\\) should return int\\|string but returns mixed\\.$#"
+			message: "#^Strict comparison using \\=\\=\\= between array and false will always evaluate to false\\.$#"
 			count: 1
-			path: src/AbstractModel.php
-
-		-
-			message: "#^Method SimplePhpModelSystem\\\\AbstractModel\\:\\:toArray\\(\\) should return array\\<string, int\\|string\\> but returns array\\<string, mixed\\>\\.$#"
-			count: 1
-			path: src/AbstractModel.php
-
-		-
-			message: "#^Parameter \\#1 \\$data of method SimplePhpModelSystem\\\\AbstractModel\\:\\:transform\\(\\) expects array\\<string, int\\|string\\>, mixed given\\.$#"
-			count: 3
-			path: src/AbstractModel.php
-
-		-
-			message: "#^Property SimplePhpModelSystem\\\\AbstractModel\\:\\:\\$data \\(array\\<string, mixed\\>\\) does not accept array\\<int\\|string, mixed\\>\\.$#"
-			count: 1
-			path: src/AbstractModel.php
-
-		-
-			message: "#^Property SimplePhpModelSystem\\\\AbstractModel\\:\\:\\$keysToModify \\(array\\<string, true\\>\\) does not accept non\\-empty\\-array\\<int\\|string, true\\>\\.$#"
-			count: 1
-			path: src/AbstractModel.php
+			path: tests/DatabaseAbstractTestCase.php
 
