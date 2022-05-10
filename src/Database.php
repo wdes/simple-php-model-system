@@ -17,7 +17,7 @@ use PDOStatement;
  * You can obtain one at https://mozilla.org/MPL/2.0/.
  * @license MPL-2.0 https://mozilla.org/MPL/2.0/
  * @source https://github.com/wdes/simple-php-model-system
- * @version 1.2.1
+ * @version 1.3.0
  */
 
 /**
@@ -155,7 +155,7 @@ class Database
     }
 
     /**
-     * @since 1.2.1
+     * @since 1.3.0
      */
     public function getDbName(): string
     {
