@@ -7,7 +7,7 @@ namespace SimplePhpModelSystem\Test\Models;
 use examples\User;
 use SimplePhpModelSystem\Tests\DatabaseAbstractTestCase;
 
-class ExpositionTest extends DatabaseAbstractTestCase
+class UserTest extends DatabaseAbstractTestCase
 {
 
     private function cleanupUsers(): void
