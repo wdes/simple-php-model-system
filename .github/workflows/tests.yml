@@ -24,7 +24,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
+                php-version: ["7.4", "8.0", "8.1", "8.2", "8.3"]
                 os: [ubuntu-latest]
                 experimental: [false]
                 include:
@@ -47,7 +47,7 @@ jobs:
             - name: Copy config
               run: cp tests/config.dist.php tests/config.php
             - name: Run php tests
-              run: composer run phpunit
+              run: composer run phpunit -- --coverage-clover build/logs/clover.xml
               env:
                 TEST_MYSQL_HOST: "127.0.0.1"
                 TEST_MYSQL_DB: testdb
