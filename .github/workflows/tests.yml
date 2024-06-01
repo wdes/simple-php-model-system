@@ -22,7 +22,7 @@ jobs:
             options: --name mysql-server --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
         strategy:
             matrix:
-                php-version: ["7.2", "7.3", "7.4", "8.0", "8.1"]
+                php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3", "8.4"]
                 os: [ubuntu-latest]
         steps:
             - uses: actions/checkout@v4
@@ -30,7 +30,7 @@ jobs:
               uses: shivammathur/setup-php@v2
               with:
                   php-version: ${{ matrix.php-version }}
-                  coverage: xdebug
+                  coverage: pcov
                   extensions: mbstring
             - name: Cache module
               uses: actions/cache@v3
