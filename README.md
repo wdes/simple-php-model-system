@@ -6,7 +6,6 @@
 [![Version](http://poser.pugx.org/wdes/simple-php-model-system/version)](https://packagist.org/packages/wdes/simple-php-model-system)
 [![License](http://poser.pugx.org/wdes/simple-php-model-system/license)](https://packagist.org/packages/wdes/simple-php-model-system)
 [![PHP Version Require](http://poser.pugx.org/wdes/simple-php-model-system/require/php)](https://packagist.org/packages/wdes/simple-php-model-system)
-[![.gitattributes](http://poser.pugx.org/wdes/simple-php-model-system/gitattributes)](https://packagist.org/packages/wdes/simple-php-model-system)
 
 A simple PHP model system
 
