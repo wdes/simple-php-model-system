@@ -6,16 +6,16 @@ parameters:
 			path: tests/DatabaseAbstractTestCase.php
 
 		-
-			message: "#^Method SimplePhpModelSystem\\\\Test\\\\TestDatabase\\:\\:getQueries\\(\\) return type has no value type specified in iterable type array\\.$#"
+			message: "#^Method SimplePhpModelSystem\\\\Tests\\\\TestDatabase\\:\\:getQueries\\(\\) return type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: tests/TestDatabase.php
 
 		-
-			message: "#^Method SimplePhpModelSystem\\\\Test\\\\TestDatabase\\:\\:setQuery\\(\\) has parameter \\$params with no value type specified in iterable type array\\.$#"
+			message: "#^Method SimplePhpModelSystem\\\\Tests\\\\TestDatabase\\:\\:setQuery\\(\\) has parameter \\$params with no value type specified in iterable type array\\.$#"
 			count: 1
 			path: tests/TestDatabase.php
 
 		-
-			message: "#^Property SimplePhpModelSystem\\\\Test\\\\TestDatabase\\:\\:\\$queries type has no value type specified in iterable type array\\.$#"
+			message: "#^Property SimplePhpModelSystem\\\\Tests\\\\TestDatabase\\:\\:\\$queries type has no value type specified in iterable type array\\.$#"
 			count: 1
 			path: tests/TestDatabase.php
