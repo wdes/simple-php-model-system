@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace SimplePhpModelSystem\Test\Models;
+namespace SimplePhpModelSystem\Tests\Models;
 
 use examples\User;
 use SimplePhpModelSystem\Tests\DatabaseAbstractTestCase;

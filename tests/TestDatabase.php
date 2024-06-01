@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace SimplePhpModelSystem\Test;
+namespace SimplePhpModelSystem\Tests;
 
 use PDOStatement;
 use SimplePhpModelSystem\Database;

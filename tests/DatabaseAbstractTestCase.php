@@ -5,7 +5,6 @@ declare(strict_types = 1);
 namespace SimplePhpModelSystem\Tests;
 
 use PDO;
-use SimplePhpModelSystem\Test\TestDatabase;
 
 abstract class DatabaseAbstractTestCase extends AbstractTestCase
 {
