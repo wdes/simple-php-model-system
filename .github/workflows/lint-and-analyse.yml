@@ -1,5 +1,8 @@
 name: Lint and analyse files
 
+permissions:
+  contents: read
+
 on: [push]
 
 jobs:
