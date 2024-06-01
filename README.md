@@ -19,13 +19,28 @@ But this also works in a composer setup.
 
 ## How to use
 
+### Connect to an existing PDO connection
+
 ```php
 <?php
-
 declare(strict_types = 1);
 
 use SimplePhpModelSystem\Database;
-use examples\User;
+
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'autoload.php';// Use your autoloader or require classes by hand
+
+$db         = new Database(null);
+// With Symfony: EntityManagerInterface $em
+$db->setConnection($em->getConnection()->getNativeConnection());// Wants a PDO connection object class
+```
+
+### Connect with config
+
+```php
+<?php
+declare(strict_types = 1);
+
+use SimplePhpModelSystem\Database;
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'autoload.php';// Use your autoloader or require classes by hand
 
@@ -33,6 +48,14 @@ $configFile = __DIR__ . DIRECTORY_SEPARATOR . 'config.php';// Copy config.dist.p
 $config     =  require $configFile;
 $db         = new Database($config);
 $db->connect();// Will throw an exception if not successfull
+```
+
+### Manage models
+
+```php
+<?php
+
+use examples\User;
 
 // Without models
 
