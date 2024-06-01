@@ -22,7 +22,7 @@ jobs:
                 php-version: ["7.2", "7.3", "7.4", "8.0", "8.1"]
                 os: [ubuntu-latest]
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Use php ${{ matrix.php-version }}
               uses: shivammathur/setup-php@v2
               with:
@@ -47,6 +47,6 @@ jobs:
                 TEST_MYSQL_PASS: testpass
                 TEST_MYSQL_PORT: ${{ job.services.mysql.ports['3306'] }}
             - name: Send coverage
-              uses: codecov/codecov-action@v1
+              uses: codecov/codecov-action@v3
               with:
                   file: "./build/logs/clover.xml"
