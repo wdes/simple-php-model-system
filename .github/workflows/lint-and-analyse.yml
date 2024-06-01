@@ -6,40 +6,38 @@ permissions:
 on: [push]
 
 jobs:
-    lint-php:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: Cache module
-              uses: actions/cache@v4
-              with:
-                  path: ~/.composer/cache/
-                  key: composer-cache
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: "7.4"
-                  tools: composer:v2
-            - name: Install dependencies
-              run: composer install --no-interaction --prefer-dist --no-progress --no-suggest
-            - name: Lint files
-              run: composer run phpcs
+  lint-php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache module
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/
+          key: composer-cache
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-suggest
+      - name: Lint files
+        run: composer run phpcs
 
-    analyse-php:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: Cache module
-              uses: actions/cache@v4
-              with:
-                  path: ~/.composer/cache/
-                  key: composer-cache
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: "7.4"
-                  tools: composer:v2
-            - name: Install dependencies
-              run: composer install --no-interaction --prefer-dist --no-progress --no-suggest
-            - name: Analyse files
-              run: composer run phpstan
+  analyse-php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache module
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache/
+          key: composer-cache
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-suggest
+      - name: Analyse files
+        run: composer run phpstan

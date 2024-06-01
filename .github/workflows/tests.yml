@@ -9,6 +9,7 @@ jobs:
     test-php:
         name: Test on php ${{ matrix.php-version }} and ${{ matrix.os }}
         runs-on: ${{ matrix.os }}
+        continue-on-error: ${{ matrix.experimental }}
         services:
           mysql:
             image: mysql:5.7
@@ -21,9 +22,13 @@ jobs:
               - "3306:3306"
             options: --name mysql-server --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
         strategy:
+            fail-fast: false
             matrix:
-                php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3", "8.4"]
+                php-version: ["7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3"]
                 os: [ubuntu-latest]
+                experimental: [false]
+                include:
+                - { php-version: 'nightly', os: ubuntu-latest, experimental: true }
         steps:
             - uses: actions/checkout@v4
             - name: Use php ${{ matrix.php-version }}
