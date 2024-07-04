@@ -31,6 +31,10 @@ jobs:
                 - { php-version: 'nightly', os: ubuntu-latest, experimental: true }
         steps:
             - uses: actions/checkout@v4
+              with:
+                  # Fetch 10 commits or Scrutinizer will throw ("Failed to retrieve commit parents. If you use a shallow git checkout, please checkout at least a depth of one."), see: RepositoryIntrospector at scrutinizer-ci/ocular GitHub repository
+                  # 10 commits is an arbitrary value that is more than 1 commit
+                  fetch-depth: 10
             - name: Use php ${{ matrix.php-version }}
               uses: shivammathur/setup-php@v2
               with:
@@ -59,3 +63,9 @@ jobs:
               with:
                   file: "./build/logs/clover.xml"
                   token: ${{ secrets.CODECOV_TOKEN }}
+            - name: Upload Scrutinizer coverage
+              uses: sudo-bot/action-scrutinizer@latest
+              # Do not run this step on forked versions of the main repository (example: contributor forks)
+              if: github.repository == 'wdes/simple-php-model-system'
+              with:
+                  cli-args: "--format=php-clover build/logs/clover.xml --revision=${{ github.event.pull_request.head.sha || github.sha }}"
